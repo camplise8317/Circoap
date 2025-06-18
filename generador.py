@@ -275,7 +275,7 @@ def generar_actividad_circulo_aprendizaje(gen_model_type, gen_model_name, audit_
             -------------------------------
             """
         try:
-            with st.spinner(f"Generando contenido con IA ({gen_model_type} - {gen_model_name}, Intento {attempt})..."):
+            with st.spinner(f"Generando contenido ({gen_model_type} - {gen_model_name}, Intento {attempt})..."):
                 full_llm_response = generar_texto_con_llm(gen_model_type, gen_model_name, prompt_content_for_llm)
 
                 if full_llm_response is None:
