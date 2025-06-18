@@ -310,7 +310,8 @@ def generar_actividad_circulo_aprendizaje(gen_model_type, gen_model_name, audit_
                 st.markdown("---")
 
             # --- Extract DICTAMEN FINAL more robustly ---
-            dictamen_final_match = re.search(r"DICTAMEN FINAL:\s*\[(.*?)]", auditoria_resultado, re.DOTALL)
+            # Corrected regex to not expect square brackets around the verdict
+            dictamen_final_match = re.search(r"DICTAMEN FINAL:\s*(.*?)(?:\n|$)", auditoria_resultado, re.DOTALL)
             if dictamen_final_match:
                 auditoria_status = dictamen_final_match.group(1).strip()
             else:
@@ -436,7 +437,7 @@ def exportar_actividad_a_word(actividades_procesadas_list):
     return buffer
 
 # --- Interfaz de Usuario de Streamlit ---
-st.title("📚 Generador y Auditor de Actividades para Círculos de Aprendizaje con IA 🧠")
+st.title("📚 Generador y Auditor de Actividades para Círculos de Aprendizaje 🧠")
 st.markdown("Esta aplicación genera actividades didácticas enfocadas en la discusión para círculos de aprendizaje y las audita automáticamente.")
 
 st.sidebar.info(f"Contexto de Círculos de Aprendizaje cargado. Longitud: {len(manual_reglas_texto)} caracteres.")
@@ -582,5 +583,6 @@ if gemini_config_ok or openai_config_ok:
 
 elif not (gemini_config_ok or openai_config_ok):
     st.info("Por favor, ingresa al menos una API Key de Gemini o OpenAI en la barra lateral para comenzar.")
+
 
 
