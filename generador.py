@@ -84,7 +84,7 @@ Formación de los líderes:
 
 En CIRCOAP, reconocemos la importancia de preparar a nuestros líderes de círculos para que desempeñen su papel de manera efectiva y enriquecedora. Por esta razón, requerimos que todos los líderes participen en una formación que dura aproximadamente 10 horas. Durante esta formación, los líderes se sumergen en actividades de inmersión que les permiten experimentar de primera mano la dinámica de los círculos de aprendizaje. Se promueve un entorno de discusión activa y abierta en el que se exploran las dificultades principales que pueden surgir al liderar círculos.
 
-Además, esta formación incluye prácticas reales en las que los líderes tienen la oportunidad de aplicar lo aprendido y adquirir experiencia directa en guiar a los participantes a través de las sesiones de círculo. Esta capacitación integral garantiza que nuestros líderes estén plenamente preparados para ofrecer una experiencia educativa de alta calidad que fomente el pensamiento crítico y la colaboración en los participantes.
+Además, esta formación incluye prácticas reales en las que los líderes tienen la oportunidad de aplicar lo aprendido y adquirir experiencia directa en guiar a los participantes a través de las sesiones de círculo. Esta capacitación integral garantiza que nuestros líderes estén plenamente preparados para ofrecer una experiencia educativa de alta calidad que fomenta el pensamiento crítico y la colaboración en los participantes.
 
 *Esto puede ser una diferencia importante con otro proyectos de círculos ya que durante todas las sesiones del círculo se discute sobre el mismo tema en vez de estar proponiendo nuevos problemas en cada sesión.
 """
@@ -315,54 +315,27 @@ def generar_actividad_circulo_aprendizaje(gen_model_type, gen_model_name, audit_
                 st.markdown(auditoria_resultado)
                 st.markdown("---")
 
-            # --- Extract DICTAMEN FINAL and OBSERVACIONES FINALES more robustly ---
+            # --- Extract DICTAMEN FINAL and OBSERVACIONES FINALES robustly ---
             auditoria_status = "❌ RECHAZADO (error de extracción)" # Default status if nothing matches
             audit_observations = "No se pudieron extraer observaciones del auditor." # Default observations
 
-            # Regex to capture the dictamen and observations sections
-            # It looks for "DICTAMEN FINAL:" followed by its content,
-            # then "OBSERVACIONES FINALES:" followed by its content, until end of string.
-            match = re.search(
-                r"DICTAMEN FINAL:\s*\n*(.*?)(?=\nOBSERVACIONES FINALES:|\Z)\s*\n*OBSERVACIONES FINALES:\s*\n*(.*)",
-                auditoria_resultado,
-                re.DOTALL
-            )
-            
-            if match:
-                extracted_dictamen_text = match.group(1).strip()
-                extracted_observations_text = match.group(2).strip()
+            # Extract the content after "DICTAMEN FINAL:" and "OBSERVACIONES FINALES:"
+            dictamen_match = re.search(r"DICTAMEN FINAL:\s*([\s\S]*?)(?=\nOBSERVACIONES FINALES:|\Z)", auditoria_resultado, re.IGNORECASE)
+            observaciones_match = re.search(r"OBSERVACIONES FINALES:\s*([\s\S]*)", auditoria_resultado, re.IGNORECASE)
 
-                if "✅ CUMPLE TOTALMENTE" in extracted_dictamen_text:
-                    auditoria_status = "✅ CUMPLE TOTALMENTE"
-                elif "⚠️ CUMPLE PARCIALMENTE" in extracted_dictamen_text:
-                    auditoria_status = "⚠️ CUMPLE PARCIALMENTE"
-                elif "❌ RECHAZADO" in extracted_dictamen_text:
-                    auditoria_status = "❌ RECHAZADO"
-                else:
-                    auditoria_status = "❌ RECHAZADO (dictamen no reconocido)"
-                
-                audit_observations = extracted_observations_text
+            extracted_dictamen_text = dictamen_match.group(1).strip() if dictamen_match else ""
+            extracted_observations_text = observaciones_match.group(1).strip() if observaciones_match else ""
+
+            if "✅ CUMPLE TOTALMENTE" in extracted_dictamen_text:
+                auditoria_status = "✅ CUMPLE TOTALMENTE"
+            elif "⚠️ CUMPLE PARCIALMENTE" in extracted_dictamen_text:
+                auditoria_status = "⚠️ CUMPLE PARCIALMENTE"
+            elif "❌ RECHAZADO" in extracted_dictamen_text:
+                auditoria_status = "❌ RECHAZADO"
             else:
-                # Fallback if the structured regex fails (e.g., if one section is missing or format is too different)
-                st.warning("No se encontró la estructura completa 'DICTAMEN FINAL' y 'OBSERVACIONES FINALES'. Intentando extracción parcial.")
-                
-                # Attempt to find DICTAMEN FINAL status directly
-                if "✅ CUMPLE TOTALMENTE" in auditoria_resultado:
-                    auditoria_status = "✅ CUMPLE TOTALMENTE"
-                elif "⚠️ CUMPLE PARCIALMENTE" in auditoria_resultado:
-                    auditoria_status = "⚠️ CUMPLE PARCIALMENTE"
-                elif "❌ RECHAZADO" in auditoria_resultado:
-                    auditoria_status = "❌ RECHAZADO"
-                else:
-                    auditoria_status = "❌ RECHAZADO (dictamen no encontrado en extracción parcial)"
-
-                # Attempt to find OBSERVACIONES FINALES
-                obs_start = auditoria_resultado.find("OBSERVACIONES FINALES:")
-                if obs_start != -1:
-                    audit_observations = auditoria_resultado[obs_start + len("OBSERVACIONES FINALES:"):].strip()
-                else:
-                    audit_observations = "No se pudieron extraer observaciones específicas del auditor (formato alternativo)."
-
+                auditoria_status = "❌ RECHAZADO (dictamen no reconocido)"
+            
+            audit_observations = extracted_observations_text
 
             st.info(f"Dictamen extraído: {auditoria_status}. Observaciones: {audit_observations[:100]}...")
 
@@ -413,7 +386,7 @@ def exportar_actividad_a_word(actividades_procesadas_list, logo_file_buffer=None
         try:
             logo_file_buffer.seek(0) 
             # Ensure buffer has content before trying to add picture
-            if logo_file_buffer.getbuffer().nbytes > 0: # This check is now safer
+            if logo_file_buffer.getbuffer().nbytes > 0: 
                 doc.add_picture(logo_file_buffer, width=Inches(1.5)) # Adjust width as needed
                 doc.add_paragraph('\n') # Add a newline after the logo for spacing
             else:
