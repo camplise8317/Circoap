@@ -6,6 +6,8 @@ import docx
 import re
 import io
 import openai
+import requests # Import the requests library to fetch images from URLs
+from docx.shared import Inches # Import Inches for image sizing
 
 # --- Configuración de API Keys (Streamlit Secrets para despliegue, o input para desarrollo) ---
 st.sidebar.header("Configuración de API Keys")
@@ -44,7 +46,7 @@ else:
     st.sidebar.warning("Por favor, ingresa tu API Key de Gemini para usar modelos Gemini.")
 
 if openai_api_key:
-    openai.api_key = openai_api_key
+    openai.api_key = openai.api_key
     openai_config_ok = True
     st.sidebar.success("API Key de OpenAI configurada.")
 else:
@@ -103,6 +105,9 @@ CATEGORIAS_ACTIVIDADES = {
         "Disciplinas": ["Programación", "Robótica"]
     }
 }
+
+# --- URL del logo en GitHub (directamente de tu repositorio) ---
+LOGO_URL = "https://raw.githubusercontent.com/camplise8317/Circoap/44d10f12b415940c355bbf316a7dc8d1df2e2905/logo_final_hor.png"
 
 # --- Función para generar texto con Gemini o GPT ---
 def generar_texto_con_llm(model_type, model_name, prompt):
@@ -310,12 +315,12 @@ def generar_actividad_circulo_aprendizaje(gen_model_type, gen_model_name, audit_
                 st.markdown("---")
 
             # --- Extract DICTAMEN FINAL more robustly ---
-            # Search for the specific verdict strings directly in the audit result
-            if "✅ CUMPLE TOTALMENTE" in auditoria_resultado:
+            # Search for the specific verdict strings directly in the audit result, being flexible with newlines/spaces
+            if re.search(r"DICTAMEN FINAL:\s*\n?\s*✅ CUMPLE TOTALMENTE", auditoria_resultado, re.DOTALL):
                 auditoria_status = "✅ CUMPLE TOTALMENTE"
-            elif "⚠️ CUMPLE PARCIALMENTE" in auditoria_resultado:
+            elif re.search(r"DICTAMEN FINAL:\s*\n?\s*⚠️ CUMPLE PARCIALMENTE", auditoria_resultado, re.DOTALL):
                 auditoria_status = "⚠️ CUMPLE PARCIALMENTE"
-            elif "❌ RECHAZADO" in auditoria_resultado:
+            elif re.search(r"DICTAMEN FINAL:\s*\n?\s*❌ RECHAZADO", auditoria_resultado, re.DOTALL):
                 auditoria_status = "❌ RECHAZADO"
             else:
                 auditoria_status = "❌ RECHAZADO (formato de dictamen inesperado)"
@@ -361,14 +366,25 @@ def generar_actividad_circulo_aprendizaje(gen_model_type, gen_model_name, audit_
     return [activity_final_data] # Always return a list with the last processed activity.
 
 # --- Función para exportar actividades a un documento Word ---
-def exportar_actividad_a_word(actividades_procesadas_list):
+def exportar_actividad_a_word(actividades_procesadas_list, logo_file_buffer=None):
     """
     Exports a list of processed activities to a Word document (.docx) in memory,
     including their classification details and the final audit verdict.
+    Optionally includes a logo at the beginning of the document.
     Returns: BytesIO object of the document.
     """
     doc = docx.Document()
     
+    # Add logo if provided
+    if logo_file_buffer:
+        try:
+            # Need to seek to the beginning of the buffer before adding picture
+            logo_file_buffer.seek(0) 
+            doc.add_picture(logo_file_buffer, width=Inches(1.5)) # Adjust width as needed
+            doc.add_paragraph('\n') # Add a newline after the logo for spacing
+        except Exception as e:
+            st.warning(f"No se pudo insertar el logo en el documento: {e}")
+
     doc.add_heading('Actividades de Círculos de Aprendizaje Generadas y Auditadas', level=1)
     doc.add_paragraph('Este documento contiene las actividades generadas por el sistema de IA y sus resultados de auditoría.')
     doc.add_paragraph('')
@@ -382,7 +398,7 @@ def exportar_actividad_a_word(actividades_procesadas_list):
         final_audit_status = activity_data.get("final_audit_status", "N/A")
         final_audit_observations = activity_data.get("final_audit_observations", "No hay observaciones finales de auditoría.")
 
-        doc.add_heading(f'Actividad #{i+1}', level=2)
+        doc.add_heading(f'Actividad #{i+1}', level=2) # Changed from Ítem to Actividad for consistency
         
         # Add classification details
         doc.add_paragraph('--- Clasificación de la Actividad ---')
@@ -444,6 +460,21 @@ st.title("📚 Generador y Auditor de Actividades para Círculos de Aprendizaje 
 st.markdown("Esta aplicación genera actividades didácticas enfocadas en la discusión para círculos de aprendizaje y las audita automáticamente.")
 
 st.sidebar.info(f"Contexto de Círculos de Aprendizaje cargado. Longitud: {len(manual_reglas_texto)} caracteres.")
+
+# --- Sección de Logo (ahora se carga automáticamente desde la URL) ---
+st.sidebar.header("Logo de la Fundación")
+
+# Fetch the logo from the URL and store it in a BytesIO buffer
+logo_buffer_for_export = None
+try:
+    response = requests.get(LOGO_URL)
+    response.raise_for_status() # Raise an HTTPError for bad responses (4xx or 5xx)
+    logo_buffer_for_export = io.BytesIO(response.content)
+    st.sidebar.success("Logo cargado desde GitHub.")
+except requests.exceptions.RequestException as e:
+    st.sidebar.error(f"No se pudo cargar el logo desde la URL. Verifica la URL o tu conexión: {e}")
+    st.sidebar.warning("El documento Word se generará sin el logo.")
+
 
 # --- Selección de Modelos ---
 st.sidebar.header("Configuración de Modelos de IA")
@@ -566,10 +597,9 @@ if gemini_config_ok or openai_config_ok:
         nombre_archivo_word = st.text_input("Ingresa el nombre deseado para el archivo Word (sin la extensión .docx):", key="word_filename_activity")
         
         if nombre_archivo_word:
-            # Create a list with the single processed activity for the export function
-            activities_to_export = [st.session_state['last_processed_activity_data']]
-            
-            word_buffer = exportar_actividad_a_word(activities_to_export)
+            # Pass the logo_buffer_for_export to the export function
+            word_buffer = exportar_actividad_a_word(activities_to_export=[st.session_state['last_processed_activity_data']],
+                                                   logo_file_buffer=logo_buffer_for_export)
             
             st.download_button(
                 label="Descargar Documento Word",
