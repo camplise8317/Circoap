@@ -7,3 +7,4 @@ python-docx
 openpyxl
 typing_extensions
 requests
+Pillow
