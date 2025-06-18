@@ -310,20 +310,15 @@ def generar_actividad_circulo_aprendizaje(gen_model_type, gen_model_name, audit_
                 st.markdown("---")
 
             # --- Extract DICTAMEN FINAL more robustly ---
-            # Extract the line containing DICTAMEN FINAL
-            dictamen_line_match = re.search(r"DICTAMEN FINAL:\s*(.*)", auditoria_resultado)
-            if dictamen_line_match:
-                extracted_dictamen_text = dictamen_line_match.group(1).strip()
-                if "CUMPLE TOTALMENTE" in extracted_dictamen_text:
-                    auditoria_status = "✅ CUMPLE TOTALMENTE"
-                elif "CUMPLE PARCIALMENTE" in extracted_dictamen_text:
-                    auditoria_status = "⚠️ CUMPLE PARCIALMENTE"
-                elif "RECHAZADO" in extracted_dictamen_text:
-                    auditoria_status = "❌ RECHAZADO"
-                else:
-                    auditoria_status = "❌ RECHAZADO (formato de dictamen inesperado)"
+            # Search for the specific verdict strings directly in the audit result
+            if "✅ CUMPLE TOTALMENTE" in auditoria_resultado:
+                auditoria_status = "✅ CUMPLE TOTALMENTE"
+            elif "⚠️ CUMPLE PARCIALMENTE" in auditoria_resultado:
+                auditoria_status = "⚠️ CUMPLE PARCIALMENTE"
+            elif "❌ RECHAZADO" in auditoria_resultado:
+                auditoria_status = "❌ RECHAZADO"
             else:
-                auditoria_status = "❌ RECHAZADO (no se pudo extraer dictamen)"
+                auditoria_status = "❌ RECHAZADO (formato de dictamen inesperado)"
             
             observaciones_start = auditoria_resultado.find("OBSERVACIONES FINALES:")
             if observaciones_start != -1:
