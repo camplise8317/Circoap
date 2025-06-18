@@ -275,7 +275,7 @@ def generar_actividad_circulo_aprendizaje(gen_model_type, gen_model_name, audit_
             -------------------------------
             """
         try:
-            with st.spinner(f"Generando contenido ({gen_model_type} - {gen_model_name}, Intento {attempt})..."):
+            with st.spinner(f"Generando contenido con IA ({gen_model_type} - {gen_model_name}, Intento {attempt})..."):
                 full_llm_response = generar_texto_con_llm(gen_model_type, gen_model_name, prompt_content_for_llm)
 
                 if full_llm_response is None:
@@ -310,12 +310,16 @@ def generar_actividad_circulo_aprendizaje(gen_model_type, gen_model_name, audit_
                 st.markdown("---")
 
             # --- Extract DICTAMEN FINAL more robustly ---
-            # Corrected regex to not expect square brackets around the verdict
-            dictamen_final_match = re.search(r"DICTAMEN FINAL:\s*(.*?)(?:\n|$)", auditoria_resultado, re.DOTALL)
+            # Try to directly match one of the expected verdict strings
+            dictamen_final_match = re.search(
+                r"DICTAMEN FINAL:\s*(✅ CUMPLE TOTALMENTE|⚠️ CUMPLE PARCIALMENTE|❌ RECHAZADO)",
+                auditoria_resultado
+            )
             if dictamen_final_match:
                 auditoria_status = dictamen_final_match.group(1).strip()
             else:
-                auditoria_status = "❌ RECHAZADO (no se pudo extraer dictamen)"
+                # If direct match fails, it means the LLM deviated from the expected format
+                auditoria_status = "❌ RECHAZADO (formato de dictamen inesperado)"
             
             observaciones_start = auditoria_resultado.find("OBSERVACIONES FINALES:")
             if observaciones_start != -1:
@@ -437,7 +441,7 @@ def exportar_actividad_a_word(actividades_procesadas_list):
     return buffer
 
 # --- Interfaz de Usuario de Streamlit ---
-st.title("📚 Generador y Auditor de Actividades para Círculos de Aprendizaje 🧠")
+st.title("📚 Generador y Auditor de Actividades para Círculos de Aprendizaje con IA 🧠")
 st.markdown("Esta aplicación genera actividades didácticas enfocadas en la discusión para círculos de aprendizaje y las audita automáticamente.")
 
 st.sidebar.info(f"Contexto de Círculos de Aprendizaje cargado. Longitud: {len(manual_reglas_texto)} caracteres.")
@@ -583,6 +587,3 @@ if gemini_config_ok or openai_config_ok:
 
 elif not (gemini_config_ok or openai_config_ok):
     st.info("Por favor, ingresa al menos una API Key de Gemini o OpenAI en la barra lateral para comenzar.")
-
-
-
