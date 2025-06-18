@@ -8,6 +8,7 @@ import io
 import openai
 import requests # Import the requests library to fetch images from URLs
 from docx.shared import Inches # Import Inches for image sizing
+from PIL import Image # NEW: Import Pillow for image validation
 
 # --- Configuración de API Keys (Streamlit Secrets para despliegue, o input para desarrollo) ---
 st.sidebar.header("Configuración de API Keys")
@@ -84,7 +85,7 @@ Formación de los líderes:
 
 En CIRCOAP, reconocemos la importancia de preparar a nuestros líderes de círculos para que desempeñen su papel de manera efectiva y enriquecedora. Por esta razón, requerimos que todos los líderes participen en una formación que dura aproximadamente 10 horas. Durante esta formación, los líderes se sumergen en actividades de inmersión que les permiten experimentar de primera mano la dinámica de los círculos de aprendizaje. Se promueve un entorno de discusión activa y abierta en el que se exploran las dificultades principales que pueden surgir al liderar círculos.
 
-Además, esta formación incluye prácticas reales en las que los líderes tienen la oportunidad de aplicar lo aprendido y adquirir experiencia directa en guiar a los participantes a través de las sesiones de círculo. Esta capacitación integral garantiza que nuestros líderes estén plenamente preparados para ofrecer una experiencia educativa de alta calidad que fomenta el pensamiento crítico y la colaboración en los participantes.
+Además, esta formación incluye prácticas reales en las que los líderes tienen la oportunidad de aplicar lo aprendido y adquirir experiencia directa en guiar a los participantes a través de las sesiones de círculo. Esta capacitación integral garantiza que nuestros líderes estén plenamente preparados para ofrecer una experiencia educativa de alta calidad que fomente el pensamiento crítico y la colaboración en los participantes.
 
 *Esto puede ser una diferencia importante con otro proyectos de círculos ya que durante todas las sesiones del círculo se discute sobre el mismo tema en vez de estar proponiendo nuevos problemas en cada sesión.
 """
@@ -385,14 +386,18 @@ def exportar_actividad_a_word(actividades_procesadas_list, logo_file_buffer=None
     if logo_file_buffer:
         try:
             logo_file_buffer.seek(0) 
-            # Ensure buffer has content before trying to add picture
-            if logo_file_buffer.getbuffer().nbytes > 0: 
+            # Verify image content using Pillow before adding
+            try:
+                Image.open(logo_file_buffer) # This will raise an error if not a valid image
+                logo_file_buffer.seek(0) # Reset buffer position after Image.open()
                 doc.add_picture(logo_file_buffer, width=Inches(1.5)) # Adjust width as needed
                 doc.add_paragraph('\n') # Add a newline after the logo for spacing
-            else:
-                st.warning("El buffer del logo está vacío o no contiene datos válidos. No se insertará en el documento.")
+            except Exception as img_e:
+                st.warning(f"No se pudo procesar la imagen del logo (error de formato o datos: {img_e}). No se insertará en el documento.")
+                logo_file_buffer = None # Set to None to prevent further attempts with this buffer
         except Exception as e:
-            st.warning(f"No se pudo insertar el logo en el documento (error: {e}). El documento se generará sin el logo.")
+            st.warning(f"No se pudo insertar el logo en el documento (error inesperado: {e}). El documento se generará sin el logo.")
+            logo_file_buffer = None # Ensure it's None if any other error occurs
 
     doc.add_heading('Actividades de Círculos de Aprendizaje Generadas y Auditadas', level=1)
     doc.add_paragraph('Este documento contiene las actividades generadas por el sistema de IA y sus resultados de auditoría.')
