@@ -493,7 +493,7 @@ if gemini_config_ok or openai_config_ok:
 
     # Input for focus topic
     tema_foco_usuario = st.text_input(
-        "Tema específico o foco para la actividad (ej. "La fotosíntesis en plantas", "Resolución de problemas con fracciones", "Introducción a la robótica con sensores")",
+        """Tema específico o foco para la actividad (ej. "La fotosíntesis en plantas", "Resolución de problemas con fracciones", "Introducción a la robótica con sensores")""",
         key="tema_foco_text"
     )
     if not tema_foco_usuario:
@@ -582,4 +582,5 @@ if gemini_config_ok or openai_config_ok:
 
 elif not (gemini_config_ok or openai_config_ok):
     st.info("Por favor, ingresa al menos una API Key de Gemini o OpenAI en la barra lateral para comenzar.")
+
 
