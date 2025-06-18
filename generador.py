@@ -315,23 +315,55 @@ def generar_actividad_circulo_aprendizaje(gen_model_type, gen_model_name, audit_
                 st.markdown(auditoria_resultado)
                 st.markdown("---")
 
-            # --- Extract DICTAMEN FINAL more robustly ---
-            # Search for the specific verdict strings directly in the audit result, being flexible with newlines/spaces
-            if re.search(r"DICTAMEN FINAL:\s*\n?\s*✅ CUMPLE TOTALMENTE", auditoria_resultado, re.DOTALL):
-                auditoria_status = "✅ CUMPLE TOTALMENTE"
-            elif re.search(r"DICTAMEN FINAL:\s*\n?\s*⚠️ CUMPLE PARCIALMENTE", auditoria_resultado, re.DOTALL):
-                auditoria_status = "⚠️ CUMPLE PARCIALMENTE"
-            elif re.search(r"DICTAMEN FINAL:\s*\n?\s*❌ RECHAZADO", auditoria_resultado, re.DOTALL):
-                auditoria_status = "❌ RECHAZADO"
-            else:
-                auditoria_status = "❌ RECHAZADO (formato de dictamen inesperado)"
+            # --- Extract DICTAMEN FINAL and OBSERVACIONES FINALES more robustly ---
+            auditoria_status = "❌ RECHAZADO (error de extracción)" # Default status if nothing matches
+            audit_observations = "No se pudieron extraer observaciones del auditor." # Default observations
+
+            # Regex to capture the dictamen and observations sections
+            # It looks for "DICTAMEN FINAL:" followed by its content,
+            # then "OBSERVACIONES FINALES:" followed by its content, until end of string.
+            match = re.search(
+                r"DICTAMEN FINAL:\s*\n*(.*?)(?=\nOBSERVACIONES FINALES:|\Z)\s*\n*OBSERVACIONES FINALES:\s*\n*(.*)",
+                auditoria_resultado,
+                re.DOTALL
+            )
             
-            observaciones_start = auditoria_resultado.find("OBSERVACIONES FINALES:")
-            if observaciones_start != -1:
-                audit_observations = auditoria_resultado[observaciones_start + len("OBSERVACIONES FINALES:"):].strip()
+            if match:
+                extracted_dictamen_text = match.group(1).strip()
+                extracted_observations_text = match.group(2).strip()
+
+                if "✅ CUMPLE TOTALMENTE" in extracted_dictamen_text:
+                    auditoria_status = "✅ CUMPLE TOTALMENTE"
+                elif "⚠️ CUMPLE PARCIALMENTE" in extracted_dictamen_text:
+                    auditoria_status = "⚠️ CUMPLE PARCIALMENTE"
+                elif "❌ RECHAZADO" in extracted_dictamen_text:
+                    auditoria_status = "❌ RECHAZADO"
+                else:
+                    auditoria_status = "❌ RECHAZADO (dictamen no reconocido)"
+                
+                audit_observations = extracted_observations_text
             else:
-                audit_observations = "No se pudieron extraer observaciones específicas del auditor. Posiblemente un error de formato en la respuesta del auditor."
-            
+                # Fallback if the structured regex fails (e.g., if one section is missing or format is too different)
+                st.warning("No se encontró la estructura completa 'DICTAMEN FINAL' y 'OBSERVACIONES FINALES'. Intentando extracción parcial.")
+                
+                # Attempt to find DICTAMEN FINAL status directly
+                if "✅ CUMPLE TOTALMENTE" in auditoria_resultado:
+                    auditoria_status = "✅ CUMPLE TOTALMENTE"
+                elif "⚠️ CUMPLE PARCIALMENTE" in auditoria_resultado:
+                    auditoria_status = "⚠️ CUMPLE PARCIALMENTE"
+                elif "❌ RECHAZADO" in auditoria_resultado:
+                    auditoria_status = "❌ RECHAZADO"
+                else:
+                    auditoria_status = "❌ RECHAZADO (dictamen no encontrado en extracción parcial)"
+
+                # Attempt to find OBSERVACIONES FINALES
+                obs_start = auditoria_resultado.find("OBSERVACIONES FINALES:")
+                if obs_start != -1:
+                    audit_observations = auditoria_resultado[obs_start + len("OBSERVACIONES FINALES:"):].strip()
+                else:
+                    audit_observations = "No se pudieron extraer observaciones específicas del auditor (formato alternativo)."
+
+
             st.info(f"Dictamen extraído: {auditoria_status}. Observaciones: {audit_observations[:100]}...")
 
             # Save activity data, including final audit status and observations
@@ -459,8 +491,23 @@ def exportar_actividad_a_word(actividades_procesadas_list, logo_file_buffer=None
     buffer.seek(0)
     return buffer
 
+# --- Función para cargar el logo desde la URL de GitHub (con caché para eficiencia) ---
+@st.cache_data(show_spinner=False)
+def fetch_logo_from_url(url):
+    """
+    Fetches the logo image from a given URL and returns it as a BytesIO buffer.
+    Caches the result to avoid repeated downloads.
+    """
+    try:
+        response = requests.get(url)
+        response.raise_for_status() # Raises an HTTPError for bad responses (4xx or 5xx)
+        return io.BytesIO(response.content)
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error al cargar el logo desde la URL: {e}. Verifica la URL o tu conexión a internet.")
+        return None
+
 # --- Interfaz de Usuario de Streamlit ---
-st.title("📚 Generador y Auditor de Actividades para Círculos de Aprendizaje con IA 🧠")
+st.title("📚 Generador y Auditor de Actividades para Círculos de Aprendizaje con IA �")
 st.markdown("Esta aplicación genera actividades didácticas enfocadas en la discusión para círculos de aprendizaje y las audita automáticamente.")
 
 st.sidebar.info(f"Contexto de Círculos de Aprendizaje cargado. Longitud: {len(manual_reglas_texto)} caracteres.")
@@ -468,16 +515,11 @@ st.sidebar.info(f"Contexto de Círculos de Aprendizaje cargado. Longitud: {len(m
 # --- Sección de Logo (ahora se carga automáticamente desde la URL) ---
 st.sidebar.header("Logo de la Fundación")
 
-# Fetch the logo from the URL and store it in a BytesIO buffer
-logo_buffer_for_export = None
-try:
-    response = requests.get(LOGO_URL)
-    response.raise_for_status() # Raise an HTTPError for bad responses (4xx or 5xx)
-    logo_buffer_for_export = io.BytesIO(response.content)
+logo_buffer_for_export = fetch_logo_from_url(LOGO_URL)
+if logo_buffer_for_export:
     st.sidebar.success("Logo cargado desde GitHub.")
-except requests.exceptions.RequestException as e:
-    st.sidebar.error(f"No se pudo cargar el logo desde la URL. Verifica la URL o tu conexión: {e}")
-    st.sidebar.warning("El documento Word se generará sin el logo.")
+else:
+    st.sidebar.warning("El documento Word se generará sin el logo. Verifica la URL o tu conexión.")
 
 
 # --- Selección de Modelos ---
