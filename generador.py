@@ -310,16 +310,20 @@ def generar_actividad_circulo_aprendizaje(gen_model_type, gen_model_name, audit_
                 st.markdown("---")
 
             # --- Extract DICTAMEN FINAL more robustly ---
-            # Try to directly match one of the expected verdict strings
-            dictamen_final_match = re.search(
-                r"DICTAMEN FINAL:\s*(✅ CUMPLE TOTALMENTE|⚠️ CUMPLE PARCIALMENTE|❌ RECHAZADO)",
-                auditoria_resultado
-            )
-            if dictamen_final_match:
-                auditoria_status = dictamen_final_match.group(1).strip()
+            # Extract the line containing DICTAMEN FINAL
+            dictamen_line_match = re.search(r"DICTAMEN FINAL:\s*(.*)", auditoria_resultado)
+            if dictamen_line_match:
+                extracted_dictamen_text = dictamen_line_match.group(1).strip()
+                if "CUMPLE TOTALMENTE" in extracted_dictamen_text:
+                    auditoria_status = "✅ CUMPLE TOTALMENTE"
+                elif "CUMPLE PARCIALMENTE" in extracted_dictamen_text:
+                    auditoria_status = "⚠️ CUMPLE PARCIALMENTE"
+                elif "RECHAZADO" in extracted_dictamen_text:
+                    auditoria_status = "❌ RECHAZADO"
+                else:
+                    auditoria_status = "❌ RECHAZADO (formato de dictamen inesperado)"
             else:
-                # If direct match fails, it means the LLM deviated from the expected format
-                auditoria_status = "❌ RECHAZADO (formato de dictamen inesperado)"
+                auditoria_status = "❌ RECHAZADO (no se pudo extraer dictamen)"
             
             observaciones_start = auditoria_resultado.find("OBSERVACIONES FINALES:")
             if observaciones_start != -1:
