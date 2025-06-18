@@ -107,6 +107,7 @@ CATEGORIAS_ACTIVIDADES = {
 }
 
 # --- URL del logo en GitHub (directamente de tu repositorio) ---
+# CORRECTED URL: This points to the raw image content, not the GitHub blob page.
 LOGO_URL = "https://raw.githubusercontent.com/camplise8317/Circoap/44d10f12b415940c355bbf316a7dc8d1df2e2905/logo_final_hor.png"
 
 # --- Función para generar texto con Gemini o GPT ---
@@ -375,15 +376,18 @@ def exportar_actividad_a_word(actividades_procesadas_list, logo_file_buffer=None
     """
     doc = docx.Document()
     
-    # Add logo if provided
+    # Add logo if provided and valid
     if logo_file_buffer:
         try:
-            # Need to seek to the beginning of the buffer before adding picture
             logo_file_buffer.seek(0) 
-            doc.add_picture(logo_file_buffer, width=Inches(1.5)) # Adjust width as needed
-            doc.add_paragraph('\n') # Add a newline after the logo for spacing
+            # Ensure buffer has content before trying to add picture
+            if logo_file_buffer.getbuffer().nbytes > 0:
+                doc.add_picture(logo_file_buffer, width=Inches(1.5)) # Adjust width as needed
+                doc.add_paragraph('\n') # Add a newline after the logo for spacing
+            else:
+                st.warning("El buffer del logo está vacío o no contiene datos válidos. No se insertará en el documento.")
         except Exception as e:
-            st.warning(f"No se pudo insertar el logo en el documento: {e}")
+            st.warning(f"No se pudo insertar el logo en el documento (error: {e}). El documento se generará sin el logo.")
 
     doc.add_heading('Actividades de Círculos de Aprendizaje Generadas y Auditadas', level=1)
     doc.add_paragraph('Este documento contiene las actividades generadas por el sistema de IA y sus resultados de auditoría.')
@@ -398,7 +402,7 @@ def exportar_actividad_a_word(actividades_procesadas_list, logo_file_buffer=None
         final_audit_status = activity_data.get("final_audit_status", "N/A")
         final_audit_observations = activity_data.get("final_audit_observations", "No hay observaciones finales de auditoría.")
 
-        doc.add_heading(f'Actividad #{i+1}', level=2) # Changed from Ítem to Actividad for consistency
+        doc.add_heading(f'Actividad #{i+1}', level=2)
         
         # Add classification details
         doc.add_paragraph('--- Clasificación de la Actividad ---')
