@@ -413,7 +413,7 @@ def exportar_actividad_a_word(actividades_procesadas_list, logo_file_buffer=None
         try:
             logo_file_buffer.seek(0) 
             # Ensure buffer has content before trying to add picture
-            if logo_file_buffer.getbuffer().nbytes > 0:
+            if logo_file_buffer.getbuffer().nbytes > 0: # This check is now safer
                 doc.add_picture(logo_file_buffer, width=Inches(1.5)) # Adjust width as needed
                 doc.add_paragraph('\n') # Add a newline after the logo for spacing
             else:
@@ -507,7 +507,7 @@ def fetch_logo_from_url(url):
         return None
 
 # --- Interfaz de Usuario de Streamlit ---
-st.title("📚 Generador y Auditor de Actividades para Círculos de Aprendizaje con IA �")
+st.title("📚 Generador y Auditor de Actividades para Círculos de Aprendizaje con IA 🧠")
 st.markdown("Esta aplicación genera actividades didácticas enfocadas en la discusión para círculos de aprendizaje y las audita automáticamente.")
 
 st.sidebar.info(f"Contexto de Círculos de Aprendizaje cargado. Longitud: {len(manual_reglas_texto)} caracteres.")
