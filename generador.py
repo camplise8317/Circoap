@@ -160,7 +160,7 @@ def auditar_actividad_circulo_aprendizaje(model_type, model_name, actividad_gene
     3.  **Preguntas Retadoras**: ¿La actividad incluye preguntas que desafían el pensamiento de los participantes y los guían hacia el descubrimiento autónomo (metodología mayéutica)?
     4.  **Piso Bajo y Techo Alto**: ¿La actividad tiene un "piso bajo" (es accesible para todos los participantes sin importar su nivel inicial) y un "techo alto" (ofrece oportunidades para que los participantes más avanzados profundicen y exploren más allá)?
     5.  **Formato Claro**: ¿La actividad está bien estructurada, con secciones claras como Título, Objetivo, Materiales, Desarrollo de la Actividad, Preguntas para la Discusión, etc.?
-
+    6.  **Las actividades deben distribuirse  en una  hora  que incluya  inicio desarrollo  y cierre  
     --- PARÁMETROS DE LA ACTIVIDAD ---
     - Categoría: {categoria}
     - Subcategoría/Edad: {subcategoria}
@@ -237,7 +237,7 @@ def generar_actividad_circulo_aprendizaje(gen_model_type, gen_model_name, audit_
         3.  **Piso bajo y techo alto**: La actividad debe ser accesible para todos los participantes ("piso bajo") y al mismo tiempo permitir a los más avanzados explorar y profundizar ("techo alto"). Proporciona sugerencias para facilitar la participación inicial y para extender el desafío.
         4.  **Colaborativa**: Diseña la actividad para que fomente el aprendizaje colaborativo, no la competencia. Los niños deben trabajar juntos para explorar el tema.
         5.  **Contextualizada y Relevante**: La actividad debe ser relevante para la edad y subcategoría seleccionada, y presentarse en un contexto significativo.
-
+        6.  **Las actividades deben distribuirse  en una  hora  que incluya  inicio desarrollo  y cierre
         --- CONTEXTO DE CÍRCULOS DE APRENDIZAJE CIRCOAP ---
         Considera y aplica estrictamente todas las directrices, filosofía y características de CIRCOAP contenidas en el siguiente manual.
         Esto es de suma importancia para la calidad y pertinencia de la actividad.
