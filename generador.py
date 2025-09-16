@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 import google.generativeai as genai
 import docx
 import io
@@ -41,30 +40,12 @@ else:
 
 # --- Diccionario Detallado de la Taxonomía de Bloom ---
 bloom_taxonomy_detallada = {
-    "RECORDAR": {
-        "definicion": "Recuperar conocimiento relevante de la memoria de largo plazo.",
-        "subprocesos": { "Reconocer": {"nombres_alternativos": "Identificar", "definicion_ejemplo": "Localizar conocimiento..."}, "Evocar": {"nombres_alternativos": "Recuperar", "definicion_ejemplo": "Recuperar conocimiento..."} }
-    },
-    "COMPRENDER": {
-        "definicion": "Construir significado a partir de contenidos educativos.",
-        "subprocesos": { "Interpretar": {"nombres_alternativos": "Aclarar, parafrasear", "definicion_ejemplo": "Transformar de una forma de representación a otra..."}, "Ejemplificar": {"nombres_alternativos": "Ilustrar, citar casos", "definicion_ejemplo": "Poner un ejemplo específico..."}, "Clasificar": {"nombres_alternativos": "Categorizar", "definicion_ejemplo": "Determinar que algo pertenece a una categoría..."}, "Resumir": {"nombres_alternativos": "Abstraer, generalizar", "definicion_ejemplo": "Extraer el tema general..."}, "Inferir": {"nombres_alternativos": "Concluir, predecir", "definicion_ejemplo": "Sacar una conclusión lógica..."}, "Comparar": {"nombres_alternativos": "Contrastar, esquematizar", "definicion_ejemplo": "Detectar correspondencias..."}, "Explicar": {"nombres_alternativos": "Construir modelos", "definicion_ejemplo": "Construir un modelo de causa-efecto..."} }
-    },
-    "APLICAR": {
-        "definicion": "Desarrollar o usar un procedimiento en una situación dada.",
-        "subprocesos": { "Ejecutar": {"nombres_alternativos": "Llevar a cabo", "definicion_ejemplo": "Aplicar un procedimiento a una tarea familiar..."}, "Implementar": {"nombres_alternativos": "Utilizar", "definicion_ejemplo": "Aplicar un procedimiento a una tarea no familiar..."} }
-    },
-    "ANALIZAR": {
-        "definicion": "Despiezar el material en sus partes constituyentes y determinar cómo se relacionan.",
-        "subprocesos": { "Diferenciar": {"nombres_alternativos": "Discriminar, seleccionar", "definicion_ejemplo": "Distinguir las partes relevantes..."}, "Organizar": {"nombres_alternativos": "Integrar, estructurar", "definicion_ejemplo": "Determinar cómo encajan los elementos..."}, "Atribuir": {"nombres_alternativos": "Deconstruir", "definicion_ejemplo": "Determinar los puntos de vista, sesgos..."} }
-    },
-    "EVALUAR": {
-        "definicion": "Formular juicios con base en criterios o parámetros.",
-        "subprocesos": { "Verificar": {"nombres_alternativos": "Detectar, monitorear", "definicion_ejemplo": "Detectar inconsistencias o falacias..."}, "Criticar": {"nombres_alternativos": "Juzgar, argumentar", "definicion_ejemplo": "Detectar inconsistencias con base en criterios externos..."} }
-    },
-    "CREAR": {
-        "definicion": "Agrupar elementos para formar un todo coherente o funcional.",
-        "subprocesos": { "Generar": {"nombres_alternativos": "Formular hipótesis", "definicion_ejemplo": "Formular hipótesis alternativas..."}, "Planear": {"nombres_alternativos": "Diseñar", "definicion_ejemplo": "Idear un procedimiento..."}, "Producir": {"nombres_alternativos": "Construir", "definicion_ejemplo": "Inventar un producto..."} }
-    }
+    "RECORDAR": { "definicion": "Recuperar conocimiento relevante de la memoria de largo plazo.", "subprocesos": { "Reconocer": {"nombres_alternativos": "Identificar", "definicion_ejemplo": "Localizar conocimiento..."}, "Evocar": {"nombres_alternativos": "Recuperar", "definicion_ejemplo": "Recuperar conocimiento..."} } },
+    "COMPRENDER": { "definicion": "Construir significado a partir de contenidos educativos.", "subprocesos": { "Interpretar": {"nombres_alternativos": "Aclarar, parafrasear", "definicion_ejemplo": "Transformar de una forma de representación a otra..."}, "Ejemplificar": {"nombres_alternativos": "Ilustrar, citar casos", "definicion_ejemplo": "Poner un ejemplo específico..."}, "Clasificar": {"nombres_alternativos": "Categorizar", "definicion_ejemplo": "Determinar que algo pertenece a una categoría..."}, "Resumir": {"nombres_alternativos": "Abstraer, generalizar", "definicion_ejemplo": "Extraer el tema general..."}, "Inferir": {"nombres_alternativos": "Concluir, predecir", "definicion_ejemplo": "Sacar una conclusión lógica..."}, "Comparar": {"nombres_alternativos": "Contrastar, esquematizar", "definicion_ejemplo": "Detectar correspondencias..."}, "Explicar": {"nombres_alternativos": "Construir modelos", "definicion_ejemplo": "Construir un modelo de causa-efecto..."} } },
+    "APLICAR": { "definicion": "Desarrollar o usar un procedimiento en una situación dada.", "subprocesos": { "Ejecutar": {"nombres_alternativos": "Llevar a cabo", "definicion_ejemplo": "Aplicar un procedimiento a una tarea familiar..."}, "Implementar": {"nombres_alternativos": "Utilizar", "definicion_ejemplo": "Aplicar un procedimiento a una tarea no familiar..."} } },
+    "ANALIZAR": { "definicion": "Despiezar el material en sus partes constituyentes y determinar cómo se relacionan.", "subprocesos": { "Diferenciar": {"nombres_alternativos": "Discriminar, seleccionar", "definicion_ejemplo": "Distinguir las partes relevantes..."}, "Organizar": {"nombres_alternativos": "Integrar, estructurar", "definicion_ejemplo": "Determinar cómo encajan los elementos..."}, "Atribuir": {"nombres_alternativos": "Deconstruir", "definicion_ejemplo": "Determinar los puntos de vista, sesgos..."} } },
+    "EVALUAR": { "definicion": "Formular juicios con base en criterios o parámetros.", "subprocesos": { "Verificar": {"nombres_alternativos": "Detectar, monitorear", "definicion_ejemplo": "Detectar inconsistencias o falacias..."}, "Criticar": {"nombres_alternativos": "Juzgar, argumentar", "definicion_ejemplo": "Detectar inconsistencias con base en criterios externos..."} } },
+    "CREAR": { "definicion": "Agrupar elementos para formar un todo coherente o funcional.", "subprocesos": { "Generar": {"nombres_alternativos": "Formular hipótesis", "definicion_ejemplo": "Formular hipótesis alternativas..."}, "Planear": {"nombres_alternativos": "Diseñar", "definicion_ejemplo": "Idear un procedimiento..."}, "Producir": {"nombres_alternativos": "Construir", "definicion_ejemplo": "Inventar un producto..."} } }
 }
 
 # --- Sistema de Prompts Centralizado ---
@@ -78,36 +59,30 @@ def get_master_prompt_system():
 
     MASTER_PROMPT_SYSTEM = f"""
 # MODELO PEDAGÓGICO INTEGRAL PARA DISEÑO DE ACTIVIDADES
-
 ## CAPA 1: FILOSOFÍA (Círculos de Aprendizaje)
 Entorno colaborativo, no competitivo. El facilitador es un guía que usa la mayéutica (preguntas) para fomentar el descubrimiento.
-
 ## CAPA 2: ESTRUCTURA (Bruner)
 El aprendizaje sigue el viaje: Enactivo (hacer) -> Icónico (representar) -> Simbólico (abstraer).
-
 ## CAPA 3: COHESIÓN (Hilo Conductor)
 El producto de una fase es el insumo de la siguiente, creando una cadena de evidencia.
-
 ## CAPA 4: DIFERENCIACIÓN (Piso Bajo, Techo Alto)
 Cada fase debe ser accesible para todos (Piso Bajo) y desafiante para los más avanzados (Techo Alto).
-
 ## CAPA 5: INTENCIÓN COGNITIVA (Bloom)
 Las tareas deben provocar procesos de pensamiento específicos. El flujo general debe ascender en la taxonomía.
-
 ## CAPA 6: DETALLE DE PROCESOS COGNITIVOS (Taxonomía de Bloom Detallada)
 Utiliza los siguientes verbos, definiciones y subprocesos para diseñar las preguntas y tareas con la máxima precisión.
 {bloom_text}
 """
     return MASTER_PROMPT_SYSTEM
 
-# --- Estructura de categorías y subcategorías (se mantiene igual) ---
+# --- Estructura de categorías (se mantiene igual) ---
 CATEGORIAS_ACTIVIDADES = {
     "Círculos de Matemática y Razonamiento": {"Edades": ["5 a 7 años", "8 a 11 años", "12 a 15 años"]},
     "Ciencias": {"Disciplinas": ["Física", "Química", "Biología"]},
     "Tecnología": {"Disciplinas": ["Programación", "Robótica"]}
 }
 
-# --- Función para generar texto con Gemini o GPT (se mantiene igual) ---
+# --- Función para generar texto con LLM (se mantiene igual) ---
 def generar_texto_con_llm(model_type, model_name, prompt):
     if model_type == "Gemini":
         if not gemini_config_ok:
@@ -133,7 +108,7 @@ def generar_texto_con_llm(model_type, model_name, prompt):
             return None
     return None
 
-# --- Función de Auditoría MODIFICADA ---
+# --- Función de Auditoría Actualizada ---
 def auditar_actividad_circulo_aprendizaje(model_type, model_name, actividad_generada, nivel_salida_esperado):
     MASTER_PROMPT_SYSTEM = get_master_prompt_system()
     
@@ -164,7 +139,7 @@ def auditar_actividad_circulo_aprendizaje(model_type, model_name, actividad_gene
     """
     return generar_texto_con_llm(model_type, model_name, auditoria_prompt)
 
-# --- Función de Generación MODIFICADA ---
+# --- Función de Generación Actualizada ---
 def generar_actividad_circulo_aprendizaje(gen_model_type, gen_model_name, audit_model_type, audit_model_name,
                                           tema_foco_usuario, subcategoria_seleccionada,
                                           nivel_entrada, nivel_salida):
@@ -280,16 +255,83 @@ def generar_actividad_circulo_aprendizaje(gen_model_type, gen_model_name, audit_
 
     return [activity_final_data]
 
-# --- Interfaz de Usuario de Streamlit MODIFICADA ---
+# --- Función para exportar a Word (revisa que esté completa) ---
+def exportar_actividad_a_word(actividades_procesadas_list):
+    doc = docx.Document()
+    doc.add_heading('Actividad de Círculo de Aprendizaje Generada', level=1)
+    
+    if not actividades_procesadas_list:
+        doc.add_paragraph('No se procesó ninguna actividad.')
+    else:
+        activity_data = actividades_procesadas_list[0]
+        classification = activity_data.get("classification", {})
+        
+        doc.add_heading('Definición Estratégica', level=2)
+        doc.add_paragraph(f"**Tema:** {classification.get('Tema de Foco', 'N/A')}")
+        doc.add_paragraph(f"**Grupo:** {classification.get('Grupo', 'N/A')}")
+        doc.add_paragraph(f"**Nivel de Entrada:** {classification.get('Nivel de Entrada', 'N/A')}")
+        doc.add_paragraph(f"**Nivel de Salida:** {classification.get('Nivel de Salida', 'N/A')}")
+        doc.add_paragraph('')
+
+        doc.add_heading('Actividad Generada', level=2)
+        # Formateo mejorado para el texto de la actividad
+        lines = activity_data.get("activity_text", "").split('\n')
+        for line in lines:
+            stripped_line = line.strip()
+            if not stripped_line:
+                continue
+            
+            # Encabezados principales
+            if stripped_line.startswith("**TÍTULO") or stripped_line.startswith("**OBJETIVOS") or \
+               stripped_line.startswith("**EL HILO") or stripped_line.startswith("**DESARROLLO") or \
+               stripped_line.startswith("**CIERRE"):
+                p = doc.add_paragraph()
+                run = p.add_run(stripped_line.replace("**", ""))
+                run.bold = True
+                run.font.size = docx.shared.Pt(14)
+            # Encabezados de Fases
+            elif stripped_line.startswith("---"):
+                doc.add_paragraph('---')
+            elif stripped_line.startswith("**FASE"):
+                p = doc.add_paragraph()
+                run = p.add_run(stripped_line.replace("**", ""))
+                run.bold = True
+                run.font.size = docx.shared.Pt(12)
+            # Sub-encabezados de las fases
+            elif stripped_line.startswith("- **Facilitador") or stripped_line.startswith("- **➡️ Producto Clave") or \
+                 stripped_line.startswith("- **Punto de Partida"):
+                p = doc.add_paragraph()
+                run = p.add_run(stripped_line.replace("- **", "").replace("**", ""))
+                run.bold = True
+            else:
+                doc.add_paragraph(stripped_line.replace("*", "").strip())
+
+    buffer = io.BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer
+
+
+# --- Interfaz de Usuario de Streamlit ---
 st.title("📚 Generador de Actividades Pedagógicas con IA 🧠")
 st.markdown("Esta herramienta diseña actividades siguiendo un modelo pedagógico integral (Círculos, Bruner, Bloom).")
 
-# --- Selección de Modelos (se mantiene igual) ---
+# --- Selección de Modelos ---
 st.sidebar.header("Configuración de Modelos de IA")
-gen_model_type = st.sidebar.radio("Modelo para Generación", ["GPT", "Gemini"], key="gen_type")
-# ... (código de selección de modelos se mantiene igual)
-audit_model_type = st.sidebar.radio("Modelo para Auditoría", ["Gemini", "GPT"], key="audit_type")
-# ... (código de selección de modelos se mantiene igual)
+st.sidebar.subheader("Modelo para Generación")
+gen_model_type = st.sidebar.radio("Tipo", ["GPT", "Gemini"], key="gen_type")
+if gen_model_type == "GPT":
+    gen_model_name = st.sidebar.selectbox("Modelo GPT", ["gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"], key="gen_gpt_name")
+else:
+    gen_model_name = st.sidebar.selectbox("Modelo Gemini", ["gemini-1.5-pro", "gemini-1.5-flash"], key="gen_gemini_name")
+
+st.sidebar.subheader("Modelo para Auditoría")
+audit_model_type = st.sidebar.radio("Tipo", ["Gemini", "GPT"], key="audit_type", index=0) # Gemini por defecto
+if audit_model_type == "Gemini":
+    audit_model_name = st.sidebar.selectbox("Modelo Gemini", ["gemini-1.5-pro", "gemini-1.5-flash"], key="audit_gemini_name")
+else:
+    audit_model_name = st.sidebar.selectbox("Modelo GPT", ["gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"], key="audit_gpt_name")
+
 
 if gemini_config_ok or openai_config_ok:
     st.header("1. Defina la Entrada Estratégica")
@@ -334,9 +376,11 @@ if gemini_config_ok or openai_config_ok:
             st.markdown("---")
             st.info("Iniciando ciclo de generación y auditoría...")
             
+            # --- CORRECCIÓN CLAVE AQUÍ ---
+            # Usamos las variables gen_model_name y audit_model_name de la UI
             activity_processed_list = generar_actividad_circulo_aprendizaje(
-                gen_model_type, "gpt-4o", # Asumiendo modelo para brevedad
-                audit_model_type, "gemini-1.5-pro", # Asumiendo modelo para brevedad
+                gen_model_type, gen_model_name,
+                audit_model_type, audit_model_name,
                 tema_foco_usuario,
                 subcategoria_seleccionada,
                 nivel_entrada_usuario,
@@ -345,33 +389,31 @@ if gemini_config_ok or openai_config_ok:
 
             if activity_processed_list:
                 st.session_state['last_processed_activity_data'] = activity_processed_list[0]
-                # Lógica para mostrar resultados se mantiene similar a tu versión anterior...
                 final_data = st.session_state['last_processed_activity_data']
                 st.subheader("Resultado Final del Proceso")
-                st.markdown(final_data['activity_text'])
-                st.info(f"**Dictamen Final:** {final_data['final_audit_status']}")
-                st.warning(f"**Observaciones del Auditor:** {final_data['final_audit_observations']}")
+                
+                if final_data['activity_text']:
+                    st.markdown(final_data['activity_text'])
+                    st.info(f"**Dictamen Final del Auditor:** {final_data['final_audit_status']}")
+                    if final_data['final_audit_status'] != "✅ CUMPLE":
+                        st.warning(f"**Observaciones del Auditor:** {final_data['final_audit_observations']}")
+                else:
+                    st.error("No se pudo generar el texto de la actividad. Revisa los logs o la configuración de la API.")
 
-# --- Sección de Exportación a Word (se mantiene igual, pero requiere la función) ---
-def exportar_actividad_a_word(actividades_procesadas_list):
-    # Esta función se mantiene exactamente como la tenías en tu código original
-    doc = docx.Document()
-    # ... (pega aquí tu código de la función de exportación)
-    buffer = io.BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
-    return buffer
-
-st.header("3. Exportar Actividad")
-if 'last_processed_activity_data' in st.session_state and st.session_state['last_processed_activity_data']:
-    st.success("Hay una actividad lista para ser exportada.")
-    if st.button("Preparar Documento para Descarga"):
+    st.header("3. Exportar Actividad")
+    if 'last_processed_activity_data' in st.session_state and st.session_state['last_processed_activity_data']:
+        st.success("Hay una actividad lista para ser exportada.")
+        nombre_base = tema_foco_usuario.strip().replace(' ', '_')[:30]
+        
         word_buffer = exportar_actividad_a_word([st.session_state['last_processed_activity_data']])
         st.download_button(
             label="Descargar Actividad en Word",
             data=word_buffer,
-            file_name=f"actividad_{tema_foco_usuario[:20].replace(' ', '_')}.docx",
+            file_name=f"actividad_{nombre_base}.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
+    else:
+        st.info("Genere una actividad para poder exportarla.")
+
 else:
-    st.info("Genere una actividad para poder exportarla.")
+    st.info("Por favor, ingresa al menos una API Key de Gemini o OpenAI en la barra lateral para comenzar.")
