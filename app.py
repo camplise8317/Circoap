@@ -280,7 +280,7 @@ Usa los siguientes verbos y definiciones con precisión.
         if st.button("🤖 IA, ¡sugiéreme un contexto!", type="primary"):
             with st.spinner("La IA está imaginando un universo... ✨"):
                 # Usaremos un modelo rápido para sugerencias
-                suggestion_model = "gemini-1.5-flash-001"
+                suggestion_model = "gemini-2.5-flash-lite"
                 prompt_contexto = f"Basado en: '{st.session_state.inspiration_text}', genera 1 opción de contexto narrativo breve y creativo."
                 sugerencia = generar_texto_con_vertex(suggestion_model, prompt_contexto)
                 if sugerencia: st.session_state.final_context = sugerencia
@@ -304,9 +304,9 @@ Usa los siguientes verbos y definiciones con precisión.
         st.subheader("1. Configuración de Modelos de Vertex AI")
         # Nota: Los nombres de los modelos son ejemplos. Ajústalos a los modelos disponibles en tu proyecto.
         vertex_ai_models = [
-            "gemini-1.5-pro-001",
-            "gemini-1.5-flash-001",
-            "gemini-1.0-pro-002"
+            "gemini-2.5-pro",
+            "gemini-2.5-flash",
+            "gemini-2.5-flash-lite"
         ]
         col_m1, col_m2 = st.columns(2)
         with col_m1:
