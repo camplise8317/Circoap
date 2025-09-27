@@ -44,12 +44,38 @@ def main():
         st.sidebar.error(f"Error al inicializar Vertex AI: {e}")
         st.error("No se pudo conectar con Vertex AI. Verifica la configuración del proyecto y tu autenticación.")
         st.stop()
+
+    # --- BLOQUE DE CONFIGURACIÓN DE MODELOS EN LA BARRA LATERAL ---
+    st.sidebar.subheader("Selección de Modelos")
+
+    # Nota: Los nombres de los modelos son ejemplos. Ajústalos a los modelos disponibles en tu proyecto.
+    vertex_ai_models = [
+        "gemini-1.5-pro-001",
+        "gemini-1.5-flash-001",
+        "gemini-1.0-pro-002"
+    ]
+
+    # Guardamos los modelos seleccionados en el estado de la sesión
+    st.session_state.gen_model_name = st.sidebar.selectbox(
+        "**Modelo para Generación**",
+        vertex_ai_models,
+        index=1, # Por defecto 'flash'
+        key="gen_vertex_name_sidebar"
+    )
+
+    st.session_state.audit_model_name = st.sidebar.selectbox(
+        "**Modelo para Auditoría**",
+        vertex_ai_models,
+        index=0, # Por defecto 'pro'
+        key="audit_vertex_name_sidebar",
+        help="Se recomienda un modelo potente (ej. Pro) para la auditoría."
+    )
     
     # --- DICCIONARIO DE LA TAXONOMÍA DE BLOOM (sin cambios) ---
     bloom_taxonomy_detallada = {
         "RECORDAR": { "definicion": "Recuperar conocimiento relevante de la memoria de largo plazo.", "subprocesos": { "Reconocer": {"nombres_alternativos": "Identificar", "definicion_ejemplo": "Localizar conocimiento..."}, "Evocar": {"nombres_alternativos": "Recuperar", "definicion_ejemplo": "Recuperar conocimiento..."} } },
         "COMPRENDER": { "definicion": "Construir significado a partir de contenidos educativos.", "subprocesos": { "Interpretar": {"nombres_alternativos": "Aclarar, parafrasear", "definicion_ejemplo": "Transformar de una forma de representación a otra..."}, "Ejemplificar": {"nombres_alternativos": "Ilustrar, citar casos", "definicion_ejemplo": "Poner un ejemplo específico..."}, "Clasificar": {"nombres_alternativos": "Categorizar", "definicion_ejemplo": "Determinar que algo pertenece a una categoría..."}, "Resumir": {"nombres_alternativos": "Abstraer, generalizar", "definicion_ejemplo": "Extraer el tema general..."}, "Inferir": {"nombres_alternativos": "Concluir, predecir", "definicion_ejemplo": "Sacar una conclusión lógica..."}, "Comparar": {"nombres_alternativos": "Contrastar, esquematizar", "definicion_ejemplo": "Detectar correspondencias..."}, "Explicar": {"nombres_alternativos": "Construir modelos", "definicion_ejemplo": "Construir un modelo de causa-efecto..."} } },
-        "APLICAR": { "definicion": "Desarrollar o usar un procedimiento en una situación dada.", "subprocesos": { "Ejecutar": {"nombres_alternativos": "Llevar a cabo", "definicion_ejemplo": "Aplicar un procedimiento a una tarea familiar..."}, "Implementar": {"nombres_alternativos": "Utilizar", "definicion_ejemplo": "Aplicar un procedimiento a una tarea no familiar..."} } },
+        "APLICAR": { "definicion": "Desarrolar o usar un procedimiento en una situación dada.", "subprocesos": { "Ejecutar": {"nombres_alternativos": "Llevar a cabo", "definicion_ejemplo": "Aplicar un procedimiento a una tarea familiar..."}, "Implementar": {"nombres_alternativos": "Utilizar", "definicion_ejemplo": "Aplicar un procedimiento a una tarea no familiar..."} } },
         "ANALIZAR": { "definicion": "Despiezar el material en sus partes constituyentes y determinar cómo se relacionan.", "subprocesos": { "Diferenciar": {"nombres_alternativos": "Discriminar, seleccionar", "definicion_ejemplo": "Distinguir las partes relevantes..."}, "Organizar": {"nombres_alternativos": "Integrar, estructurar", "definicion_ejemplo": "Determinar cómo encajan los elementos..."}, "Atribuir": {"nombres_alternativos": "Deconstruir", "definicion_ejemplo": "Determinar los puntos de vista, sesgos..."} } },
         "EVALUAR": { "definicion": "Formular juicios con base en criterios o parámetros.", "subprocesos": { "Verificar": {"nombres_alternativos": "Detectar, monitorear", "definicion_ejemplo": "Detectar inconsistencias o falacias..."}, "Criticar": {"nombres_alternativos": "Juzgar, argumentar", "definicion_ejemplo": "Detectar inconsistencias con base en criterios externos..."} } },
         "CREAR": { "definicion": "Agrupar elementos para formar un todo coherente o funcional.", "subprocesos": { "Generar": {"nombres_alternativos": "Formular hipótesis", "definicion_ejemplo": "Formular hipótesis alternativas..."}, "Planear": {"nombres_alternativos": "Diseñar", "definicion_ejemplo": "Idear un procedimiento..."}, "Producir": {"nombres_alternativos": "Construir", "definicion_ejemplo": "Inventar un producto..."} } }
@@ -280,7 +306,7 @@ Usa los siguientes verbos y definiciones con precisión.
         if st.button("🤖 IA, ¡sugiéreme un contexto!", type="primary"):
             with st.spinner("La IA está imaginando un universo... ✨"):
                 # Usaremos un modelo rápido para sugerencias
-                suggestion_model = "gemini-2.5-flash-lite"
+                suggestion_model = "gemini-1.5-flash-001"
                 prompt_contexto = f"Basado en: '{st.session_state.inspiration_text}', genera 1 opción de contexto narrativo breve y creativo."
                 sugerencia = generar_texto_con_vertex(suggestion_model, prompt_contexto)
                 if sugerencia: st.session_state.final_context = sugerencia
@@ -300,28 +326,12 @@ Usa los siguientes verbos y definiciones con precisión.
     elif st.session_state.stage in ["generation", "refinement"]:
         st.header("ETAPA 3: Diseño y Refinamiento 🛠️")
         
-        # --- NUEVA SECCIÓN PARA SELECCIÓN DE MODELOS ---
-        st.subheader("1. Configuración de Modelos de Vertex AI")
-        # Nota: Los nombres de los modelos son ejemplos. Ajústalos a los modelos disponibles en tu proyecto.
-        vertex_ai_models = [
-            "gemini-2.5-pro",
-            "gemini-2.5-flash",
-            "gemini-2.5-flash-lite"
-        ]
-        col_m1, col_m2 = st.columns(2)
-        with col_m1:
-            gen_model_name = st.selectbox("**Modelo para Generación**", vertex_ai_models, index=1, key="gen_vertex_name")
-        with col_m2:
-            audit_model_name = st.selectbox("**Modelo para Auditoría**", vertex_ai_models, index=0, key="audit_vertex_name", help="Se recomienda un modelo potente (ej. Pro) para la auditoría.")
-        
-        st.markdown("---")
-
         with st.expander("Ver y Editar Contexto Narrativo", expanded=False):
             st.markdown(st.session_state.final_context)
         
         col_p1, col_p2 = st.columns(2)
         with col_p1:
-            st.subheader("2. Parámetros Pedagógicos")
+            st.subheader("1. Parámetros Pedagógicos")
             categoria_seleccionada = st.selectbox("Categoría", list(CATEGORIAS_ACTIVIDADES.keys()))
             if categoria_seleccionada == "Círculos de Matemática y Razonamiento":
                 sub_options = CATEGORIAS_ACTIVIDADES[categoria_seleccionada]["Edades"]
@@ -329,7 +339,7 @@ Usa los siguientes verbos y definiciones con precisión.
                 sub_options = CATEGORIAS_ACTIVIDADES[categoria_seleccionada]["Disciplinas"]
             subcategoria_seleccionada = st.selectbox("Grupo", sub_options)
         with col_p2:
-            st.subheader("3. Alcance del Aprendizaje")
+            st.subheader("2. Alcance del Aprendizaje")
             nivel_entrada_usuario = st.text_input("Nivel de entrada", placeholder="Ej: Saben construir con bloques.")
             nivel_salida_usuario = st.selectbox("Máxima habilidad de Bloom", options=list(bloom_taxonomy_detallada.keys()), index=len(bloom_taxonomy_detallada) - 1)
 
@@ -343,8 +353,8 @@ Usa los siguientes verbos y definiciones con precisión.
                     "grupo": subcategoria_seleccionada,
                     "nivel_entrada": nivel_entrada_usuario,
                     "nivel_salida": nivel_salida_usuario,
-                    "gen_model": gen_model_name,    # <-- Pasa el modelo de generación
-                    "audit_model": audit_model_name # <-- Pasa el modelo de auditoría
+                    "gen_model": st.session_state.gen_model_name,      # <-- Lee desde el estado de la sesión
+                    "audit_model": st.session_state.audit_model_name   # <-- Lee desde el estado de la sesión
                 }
                 st.session_state.processed_activity = generar_actividad_con_auditoria(params)
                 if st.session_state.processed_activity:
@@ -370,8 +380,8 @@ Usa los siguientes verbos y definiciones con precisión.
                         --- TAREA ---
                         Genera la nueva versión completa de la actividad incorporando el feedback. Produce solo la actividad mejorada.
                         """
-                        # Usa el modelo de generación para el refinamiento manual
-                        actividad_refinada = generar_texto_con_vertex(gen_model_name, prompt_refinamiento)
+                        # Usa el modelo de generación seleccionado para el refinamiento
+                        actividad_refinada = generar_texto_con_vertex(st.session_state.gen_model_name, prompt_refinamiento)
                         if actividad_refinada:
                             st.session_state.processed_activity['activity_text'] = actividad_refinada
                             st.rerun()
