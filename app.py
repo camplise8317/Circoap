@@ -53,9 +53,9 @@ def main():
     # --- BLOQUE DE CONFIGURACIÓN DE MODELOS EN LA BARRA LATERAL ---
     st.sidebar.subheader("Selección de Modelos")
     vertex_ai_models = [
-        "gemini-1.5-pro-001",
-        "gemini-1.5-flash-001",
-        "gemini-1.0-pro-002"
+        "gemini-2.5-pro",
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite"
     ]
     st.session_state.gen_model_name = st.sidebar.selectbox(
         "**Modelo para Generación y Planificación**",
