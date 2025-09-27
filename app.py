@@ -109,13 +109,6 @@ Usa los siguientes verbos y definiciones con precisión.
 {bloom_text}
 """
 
-    # --- Estructura de categorías (sin cambios) ---
-    CATEGORIAS_ACTIVIDADES = {
-        "Círculos de Matemática y Razonamiento": {"Edades": ["5 a 7 años", "8 a 11 años", "12 a 15 años"]},
-        "Ciencias": {"Disciplinas": ["Física", "Química", "Biología"]},
-        "Tecnología": {"Disciplinas": ["Programación", "Robótica"]}
-    }
-
     # --- FUNCIONES DE UTILIDAD Y LÓGICA DE LA APP ---
 
     def leer_docx(file):
@@ -408,19 +401,13 @@ Usa los siguientes verbos y definiciones con precisión.
         with st.expander("Ver Plan de Secuencia Final", expanded=False):
             st.markdown(st.session_state.sequence_plan)
         
-        col_p1, col_p2 = st.columns(2)
-        with col_p1:
-            st.subheader("Parámetros Pedagógicos")
-            categoria_seleccionada = st.selectbox("Categoría", list(CATEGORIAS_ACTIVIDADES.keys()))
-            if categoria_seleccionada == "Círculos de Matemática y Razonamiento":
-                sub_options = CATEGORIAS_ACTIVIDADES[categoria_seleccionada]["Edades"]
-            else:
-                sub_options = CATEGORIAS_ACTIVIDADES[categoria_seleccionada]["Disciplinas"]
-            subcategoria_seleccionada = st.selectbox("Grupo", sub_options)
-        with col_p2:
-            st.subheader("Nivel de Entrada")
-            nivel_entrada_usuario = st.text_input("Nivel de entrada para la PRIMERA sesión", placeholder="Ej: Saben construir con bloques.")
+        st.subheader("Parámetros Pedagógicos")
+        
+        # Valores temporales para que el código siga funcionando
+        subcategoria_seleccionada = "Grupo General" 
+        nivel_entrada_usuario = st.text_input("Nivel de entrada para la PRIMERA sesión", placeholder="Ej: Los estudiantes pueden describir un objeto simple.")
 
+       
         if st.button("🚀 Generar SECUENCIA COMPLETA con Auditoría", type="primary"):
             if not all([st.session_state.sequence_plan, nivel_entrada_usuario]):
                 st.error("Por favor, asegúrate de tener un plan de secuencia y de definir el nivel de entrada.")
