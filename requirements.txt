@@ -1,6 +1,7 @@
 streamlit
 pandas
 google-generativeai
+google-cloud-aiplatform
 openai
 PyPDF2
 python-docx
